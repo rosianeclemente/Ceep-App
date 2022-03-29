@@ -25,11 +25,12 @@ interface NotaDao {
     suspend fun salvaLista(note: List<Nota>)
 
     @Query("SELECT * FROM Nota WHERE sincronizada = 0 AND desativada = 0")
-    suspend fun buscaNaoSincronizada(): Flow<List<Nota>>
+    //
+    fun buscaNaoSincronizada(): Flow<List<Nota>>
 
     @Query("UPDATE Nota SET desativada = 1 WHERE id = :id")
     suspend fun desativa(id: String)
 
     @Query("SELECT * FROM Nota WHERE desativada = 1")
-    suspend fun buscaDesativadas(): Flow<List<Nota>>
+    fun buscaDesativadas(): Flow<List<Nota>>
 }

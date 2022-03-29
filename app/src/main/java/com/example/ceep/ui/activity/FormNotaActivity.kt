@@ -110,18 +110,19 @@ class FormNotaActivity : AppCompatActivity() {
         lifecycleScope.launch {
            notaId?.let { id ->
                repository.remove(id)
-
            }
-            finish()
         }
+        finish()
+
     }
 
     private fun salva() {
         val nota = criaNota()
         lifecycleScope.launch {
             repository.salva(nota)
-            finish()
         }
+        finish()
+
     }
 
     private fun criaNota(): Nota {
@@ -139,5 +140,7 @@ class FormNotaActivity : AppCompatActivity() {
             descricao = descricao,
             imagem = imagem.value
         )
+        finish()
     }
+
 }

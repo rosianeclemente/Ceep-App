@@ -50,7 +50,6 @@ class NotasRepository(private val dao: NotaDao, private val webClient: NotaWebCl
         val notasNaoSincronizada = dao.buscaNaoSincronizada().first()
         notasNaoSincronizada.forEach{ notaNaoSincronizada ->
             salva(notaNaoSincronizada)
-
         }
         atualizaTodas()
     }
