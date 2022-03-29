@@ -11,7 +11,9 @@ import com.example.ceep.database.AppDatabase
 import com.example.ceep.databinding.ActivityFormNotaBinding
 import com.example.ceep.extensions.tentaCarregarImagem
 import com.example.ceep.model.Nota
+import com.example.ceep.repositoy.NotasRepository
 import com.example.ceep.ui.dialog.FormImagemDialog
+import com.example.ceep.webclient.NotaWebClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -21,10 +23,13 @@ class FormNotaActivity : AppCompatActivity() {
         ActivityFormNotaBinding.inflate(layoutInflater)
     }
     private var imagem: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val dao by lazy {
-        AppDatabase.instancia(this).notaDao()
+    private val repository by lazy{
+        NotasRepository(
+            AppDatabase.instancia(this).notaDao(),
+            NotaWebClient()
+        )
     }
-    private var notaId: Long = 0L
+    private var notaId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,18 +62,20 @@ class FormNotaActivity : AppCompatActivity() {
     }
 
     private suspend fun tentaBuscarNota() {
-        dao.buscaPorId(notaId)
-            .filterNotNull()
-            .collect { notaEncontrada ->
-                notaId = notaEncontrada.id
-                imagem.value = notaEncontrada.imagem
-                binding.activityFormNotaTitulo.setText(notaEncontrada.titulo)
-                binding.activityFormNotaDescricao.setText(notaEncontrada.descricao)
-            }
+        notaId?.let { id ->
+            repository.buscarPorId(id)
+                .filterNotNull()
+                .collect { notaEncontrada ->
+                    notaId = notaEncontrada.id
+                    imagem.value = notaEncontrada.imagem
+                    binding.activityFormNotaTitulo.setText(notaEncontrada.titulo)
+                    binding.activityFormNotaDescricao.setText(notaEncontrada.descricao)
+                }
+        }
     }
 
     private fun tentaCarregarIdDaNota() {
-        notaId = intent.getLongExtra(NOTA_ID, 0L)
+        notaId = intent.getStringExtra(NOTA_ID)
     }
 
     private fun configuraImagem() {
@@ -101,7 +108,10 @@ class FormNotaActivity : AppCompatActivity() {
 
     private fun remove() {
         lifecycleScope.launch {
-            dao.remove(notaId)
+           notaId?.let { id ->
+               repository.remove(id)
+
+           }
             finish()
         }
     }
@@ -109,7 +119,7 @@ class FormNotaActivity : AppCompatActivity() {
     private fun salva() {
         val nota = criaNota()
         lifecycleScope.launch {
-            dao.salva(nota)
+            repository.salva(nota)
             finish()
         }
     }
@@ -117,8 +127,14 @@ class FormNotaActivity : AppCompatActivity() {
     private fun criaNota(): Nota {
         val titulo = binding.activityFormNotaTitulo.text.toString()
         val descricao = binding.activityFormNotaDescricao.text.toString()
-        return Nota(
-            id = notaId,
+        return notaId?.let { id ->
+            Nota(
+                id = id,
+                titulo = titulo,
+                descricao = descricao,
+                imagem = imagem.value
+            )
+        } ?: Nota(
             titulo = titulo,
             descricao = descricao,
             imagem = imagem.value

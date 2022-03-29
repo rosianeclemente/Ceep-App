@@ -1,6 +1,7 @@
 package com.example.ceep.webclient.modelResposta
 
 import com.example.ceep.model.Nota
+import java.util.*
 
 class NotaResposta(
     val id: String?,
@@ -10,7 +11,7 @@ class NotaResposta(
 ) {
     val nota: Nota
         get() = Nota(
-            id = 0,
+            id = id ?: UUID.randomUUID().toString(),
             titulo = titulo ?: "",
             descricao = descricao ?: "",
             imagem = imagem ?: ""
