@@ -20,4 +20,7 @@ interface NotaDao {
 
     @Query("DELETE FROM Nota WHERE id = :id")
     suspend fun remove(id: Long)
+
+    @Insert
+    suspend fun salvaLista(note: List<Nota>)
 }
